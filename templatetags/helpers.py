@@ -2,7 +2,8 @@ from decimal import Decimal
 
 from django import template
 
-from baldmediziner import settings
+from django.conf import settings
+from django.core.urlresolvers import reverse
 
 register = template.Library()
 
@@ -22,11 +23,15 @@ def table(rows):
 
 @register.simple_tag
 def link(url, text='', classes=''):
+    if not (url.startswith('http') or url.startswith('/')):
+        url = reverse(url)
+
     if not text:
         text = url
     if classes:
         classes = ' class="{cl}"'.format(cl=classes)
     return '<a href="{url}"{cl}>{text}</a>'.format(url=url, cl=classes, text=text)
+
 
 @register.simple_tag
 def jsfile(url):
@@ -35,6 +40,16 @@ def jsfile(url):
         url = settings.STATIC_URL + url
 
     return '<script type="text/javascript" src="{src}"></script>'.format(src=url)
+
+
+@register.simple_tag
+def cssfile(url):
+    if not url.startswith('http://') and not url[:1] == '/':
+        #add media_url for relative paths
+        url = settings.STATIC_URL + url
+
+    return '<link href="{src}" rel="stylesheet">'.format(src=url)
+
 
 @register.simple_tag
 def img(url, alt='', classes=''):
