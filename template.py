@@ -13,9 +13,10 @@ def render_template(tpl, context):
 	for tpl in templates:
 		try:
 			tpl_instance = template.loader.get_template(tpl)
+			break
 		except template.TemplateDoesNotExist:
 			pass
-
+	
 	if not tpl_instance:
 		raise Exception('Template does not exist: ' + templates[-1])
 
