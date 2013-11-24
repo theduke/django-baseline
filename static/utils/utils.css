@@ -1,0 +1,39 @@
+
+/*
+ * Countdownbox stuff.
+ */
+
+.countdownbox {
+	padding: 10px;
+	display: inline-block;
+
+	border: 1px solid #ddd;
+	border-radius: 10px;
+}
+
+.countdownbox .name {
+	font-size: 25px;
+}
+
+.countdownbox .description {
+	margin-bottom: 10px;
+}
+
+.countdownbox .counter {
+	text-align: center;
+}
+
+.countdownbox .part {
+	display: inline-block;
+	margin-right: 5px;
+}
+
+.countdownbox .part .number {
+	font-size: 20px;
+	color: #176db3;
+	text-align: center;
+}
+
+.countdownbox .part .unit {
+	text-align: center;
+}

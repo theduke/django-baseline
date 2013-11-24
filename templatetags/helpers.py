@@ -5,10 +5,17 @@ from django import template
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
+from utils import html
+
 register = template.Library()
+ 
 
 @register.simple_tag
 def table(rows):
+    '''
+    Output a simple table with several columns.
+    '''
+
     output = '<table>'
 
     for row in rows:
@@ -22,19 +29,23 @@ def table(rows):
     return output
 
 @register.simple_tag
-def link(url, text='', classes=''):
+def link(url, text='', classes='', target=''):
+    '''
+    Output a link tag.
+    '''
+
     if not (url.startswith('http') or url.startswith('/')):
         url = reverse(url)
 
-    if not text:
-        text = url
-    if classes:
-        classes = ' class="{cl}"'.format(cl=classes)
-    return '<a href="{url}"{cl}>{text}</a>'.format(url=url, cl=classes, text=text)
+    return html.tag('a', text or url, {'class': classes, 'target': target, 'href': url})
 
 
 @register.simple_tag
 def jsfile(url):
+    '''
+    Output a script tag to a js file.
+    '''
+
     if not url.startswith('http://') and not url[:1] == '/':
         #add media_url for relative paths
         url = settings.STATIC_URL + url
@@ -44,6 +55,10 @@ def jsfile(url):
 
 @register.simple_tag
 def cssfile(url):
+    '''
+    Output a link tag to a css stylesheet.
+    '''
+
     if not url.startswith('http://') and not url[:1] == '/':
         #add media_url for relative paths
         url = settings.STATIC_URL + url
@@ -53,6 +68,10 @@ def cssfile(url):
 
 @register.simple_tag
 def img(url, alt='', classes=''):
+    '''
+    Image tag helper.
+    '''
+
     if not url.startswith('http://') and not url[:1] == '/':
         #add media_url for relative paths
         url = settings.STATIC_URL + url
@@ -61,6 +80,7 @@ def img(url, alt='', classes=''):
     if alt:
         alt = ' alt="{alt}" title="{alt}"'.format(alt=alt)
     return '<img src="{src}"{cl}{alt}>'.format(src=url, cl=classes, alt=alt)
+    
 
 def valid_numeric(arg):
     if isinstance(arg, (int, float, Decimal)):
