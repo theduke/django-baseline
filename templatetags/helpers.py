@@ -67,7 +67,7 @@ def cssfile(url):
 
 
 @register.simple_tag
-def img(url, alt='', classes=''):
+def img(url, alt='', classes='', style=''):
     '''
     Image tag helper.
     '''
@@ -75,11 +75,15 @@ def img(url, alt='', classes=''):
     if not url.startswith('http://') and not url[:1] == '/':
         #add media_url for relative paths
         url = settings.STATIC_URL + url
-    if classes:
-        classes = ' class="{c}"'.format(c=classes)
-    if alt:
-        alt = ' alt="{alt}" title="{alt}"'.format(alt=alt)
-    return '<img src="{src}"{cl}{alt}>'.format(src=url, cl=classes, alt=alt)
+
+    attr = {
+        'class': classes,
+        'alt': alt,
+        'style': style,
+        'src': url
+    }
+
+    return html.tag('img', '', attr)
     
 
 def valid_numeric(arg):
