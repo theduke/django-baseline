@@ -1,18 +1,18 @@
 from decimal import Decimal
+import datetime
 
 from django import template
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.utils import dateformat
-from django.utils import dateparse
+from django.utils import dateformat, dateparse
 
 from utils import html
 
 register = template.Library()
 
 @register.simple_tag
-def countdown(name, date, description='', id='', granularity='sec'):
+def countdown(name, date, description='', id='', granularity='sec', start=None, progressbar=False, progressbar_inversed=False, showpct=False):
     '''
     Create a countdown.
     '''
@@ -22,6 +22,31 @@ def countdown(name, date, description='', id='', granularity='sec'):
 
     content = '<div class="name">' + name + '</div>'
     content += '<div class="description">' + description + '</div>'
+
+    if progressbar:
+        if not end: raise Exception('For progressbar, start date is requried.')
+        start_date = dateparse.parse_datetime(start) or datetime.datetime.combine(dateparse.parse_date(start), datetime.time())
+        now = datetime.datetime.now()
+
+        pct = (now - start_date).total_seconds() / (end_date - start_date).total_seconds()
+        pct = int(pct * 100)
+
+        if progressbar_inversed: pct = 100 - pct
+
+        # Note: the output is for bootstrap!
+        bar = '<div class="progress progress-striped active">'
+        bar += '<div class="progress-bar"  role="progressbar" aria-valuenow="{pct}" aria-valuemin="0" aria-valuemax="100" style="width: {pct}%">'
+        bar += '<span class="sr-only">{pct}% Complete</span>'
+        bar += '</div>'
+        bar += '</div>'
+
+        if showpct:
+            bar += '<div class="percentage">{pct}%</div>'
+
+        bar = bar.format(pct=pct)
+
+        content += bar
+
     content += '<div class="counter"></div>'
 
     attr = {
