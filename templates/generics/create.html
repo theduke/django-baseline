@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load helpers %}
+{% load crispy_forms_tags %}
+
+{% block page_title %}Create {{ form|model_verbose }}{% endblock %}
+
+{% block content %}
+{% crispy form %}
+{% endblock %}

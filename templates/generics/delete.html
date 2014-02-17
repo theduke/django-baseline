@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load helpers %}
+
+{% block page_title %}Delete {{ object|model_verbose }}: {{ object }}{% endblock %}
+
+{% block content %}
+<form action="" method="post">{% csrf_token %}
+    <p>Are you sure you want to delete "{{ object }}"?</p>
+    <input class="btn btn-primary" type="submit" value="Confirm" />
+</form>
+{% endblock %}
