@@ -1,6 +1,8 @@
 from decimal import Decimal
 
 from django import template
+from django.db.models import Model
+from django.forms import ModelForm
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -8,7 +10,7 @@ from django.core.urlresolvers import reverse
 from utils import html
 
 register = template.Library()
- 
+
 
 @register.simple_tag
 def table(rows):
@@ -84,7 +86,7 @@ def img(url, alt='', classes='', style=''):
     }
 
     return html.tag('img', '', attr)
-    
+
 
 def valid_numeric(arg):
     if isinstance(arg, (int, float, Decimal)):
@@ -158,3 +160,25 @@ def mod(value, arg):
         except Exception:
             return ''
 mod.is_safe = False
+
+
+# Model related.
+
+@register.filter
+def model_verbose(obj, capitalize=True):
+    """
+    Return the verbose name of a model.
+    The obj argument can be either a Model instance, or a ModelForm instance.
+    This allows to retrieve the verbose name of the model of a ModelForm
+    easily, without adding extra context vars.
+    """
+
+    if isinstance(obj, ModelForm):
+        name = obj._meta.model._meta.verbose_name
+    elif isinstance(obj,  Model):
+        name = obj._meta.verbose_name
+    else:
+        raise Exception('Unhandled type: ' + type(obj))
+
+    return name.capitalize() if capitalize else name
+model_verbose.is_safe = False
