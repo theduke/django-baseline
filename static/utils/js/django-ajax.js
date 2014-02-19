@@ -10,6 +10,7 @@
     $.djAjax = function(settings) {
 
         settings = $.extend(settings, {
+            crossDomain: false,
             beforeSend: function(jqXHR, settings) {
                 // Pull the token out of the DOM.
                 jqXHR.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
