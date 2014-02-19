@@ -31,13 +31,20 @@ def table(rows):
     return output
 
 @register.simple_tag
-def link(url, text='', classes='', target=''):
+def link(url, text='', classes='', target='', **kwargs):
     '''
     Output a link tag.
     '''
 
     if not (url.startswith('http') or url.startswith('/')):
-        url = reverse(url)
+        # Handle additional reverse args.
+        urlargs = {}
+
+        for arg, val in kwargs.items():
+            if arg[:4] == "url_":
+                urlargs[arg[4:]] = val
+
+        url = reverse(url, kwargs=urlargs)
 
     return html.tag('a', text or url, {'class': classes, 'target': target, 'href': url})
 
