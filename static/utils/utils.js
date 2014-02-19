@@ -4,7 +4,7 @@
 	window.utils = {};
 
 	/**
-	 * Pretty print an amount of seconds as x years, x months, 
+	 * Pretty print an amount of seconds as x years, x months,
 	 * days, hours, seconds.
 	 *
 	 * Use granularity to limit shown values:
@@ -66,7 +66,7 @@
 		if (granularity > 4 && (minutes || hours || days || months || years)) {
 			parts.push([minutes, minutes > 1 ? 'minutes' : 'minute']);
 		}
-		
+
 		if (granularity > 5) {
 			parts.push([seconds, seconds > 1 ? 'seconds' : 'second']);
 		}
@@ -76,39 +76,14 @@
 			output = '<div class="datetime">';
 			for (var key in parts) {
 				output += '<div class="part">'
-				  + '<div class="number">' + parts[key][0] + '</div>'
-				  + '<div class="unit">' + parts[key][1] + '</div>'
-				  + '</div>';
+					+ '<div class="number">' + parts[key][0] + '</div>'
+					+ '<div class="unit">' + parts[key][1] + '</div>'
+					+ '</div>';
 			}
 			output += '</div>';
 		}
 
 		return output;
 	};
-
-	window.utils.countdownbox = {
-
-		init: function() {
-			$('.countdownbox').each(function() {
-				$this = $(this);
-				var counter = $this.find('.counter');
-
-				var endTime = parseInt($this.attr('data-datetime'));
-				var granularity = $this.attr('data-granularity');
-
-				var interval = setInterval(function() {
-					var timeLeft = Math.floor((new Date(endTime * 1000) - new Date()) / 1000);
-					counter.html(utils.prettyPrintTime(timeLeft, granularity, true));
-
-					if (timeLeft <= 0) {
-						clearInterval(interval);
-					}
-				}, 1000);
-			});
-		}
-
-	};
-
-	window.utils.countdownbox.init();
 
 })(jQuery);
