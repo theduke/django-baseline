@@ -1,4 +1,5 @@
 from decimal import Decimal
+import urllib
 
 from django import template
 from django.db.models import Model
@@ -31,7 +32,7 @@ def table(rows):
     return output
 
 @register.simple_tag
-def link(url, text='', classes='', target='', **kwargs):
+def link(url, text='', classes='', target='', get="", **kwargs):
     '''
     Output a link tag.
     '''
@@ -45,6 +46,8 @@ def link(url, text='', classes='', target='', **kwargs):
                 urlargs[arg[4:]] = val
 
         url = reverse(url, kwargs=urlargs)
+        if get:
+            url += '?' + get
 
     return html.tag('a', text or url, {'class': classes, 'target': target, 'href': url})
 
