@@ -21,3 +21,14 @@ class CrispyForm(ModelForm):
 
         self.helper.add_input(Submit('submit', self.SUBMIT_LABEL))
         self.helper.form_method =  self.HTTP_METHOD
+
+
+class InlineParentForm(ModelForm):
+
+
+    def __init__(self, *args, **kwargs):
+        super(InlineParentForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        # Set to false because form set is used.
+        # See http://django-crispy-forms.readthedocs.org/en/d-0/tags.html#rendering-several-forms-with-helpers.
+        self.helper.form_tag = False

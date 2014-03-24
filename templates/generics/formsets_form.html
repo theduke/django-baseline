@@ -1,0 +1,10 @@
+{% load crispy_forms_tags %}
+<form method="POST" enctype="multipart/form-data">
+	<div class="main-form">
+    	{% crispy form form.helper %}
+    </div>
+
+    {% include "generics/_formsets.html" %}
+
+    <input type="submit" name="submit" value="Submit" class="btn btn-primary" id="submit-id-submit">
+</form>

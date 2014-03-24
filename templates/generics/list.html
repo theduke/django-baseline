@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load helpers %}
+
+{% block content %}
+<div class="generics-list">
+  
+  {% if create_uri %} 
+    {% link create_uri create_label classes="btn btn-primary" %}
+  {% endif %}
+
+  <ul>
+    {% for item in object_list %}
+    <li>
+      <span class="name">{{ item }}</span>
+      {% if editable %}
+      <div class="actions">
+        {% block actions %}
+          {% if update_uri %}
+            {% link update_uri "Edit" url_pk=item.id classes="edit btn-sm btn-info" %} 
+          {% endif %}
+          {% if delete_uri %}
+            {% link delete_uri "Delete" url_pk=item.id classes="delete btn-sm btn-danger" %} 
+          {% endif %}
+        {% endblock %}
+      </div>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

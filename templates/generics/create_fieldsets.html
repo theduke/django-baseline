@@ -1,9 +1,13 @@
-{% extends "base.html" %}
+{% extends "generics/generic_edit.html" %}
 {% load helpers %}
-{% load crispy_forms_tags %}
 
-{% block page_title %}Create {{ form|model_verbose }}{% endblock %}
+{% block page_title %}
+  {% if not page_title %}Create {{ form|model_verbose }}
+  {% else %}
+    {{page_title}}
+  {% endif %}
+{% endblock %}
 
-{% block content %}
-{% include "generics/_formsets.html" %}
+{% block form %}
+{% include "generics/formsets_form.html" %}
 {% endblock %}

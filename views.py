@@ -3,10 +3,13 @@ import json
 from django.shortcuts import render, render_to_response
 from django.views.generic import edit
 from django.views.generic import detail
+from django.views import generic
+from django import forms
 from django.forms.models import inlineformset_factory, modelformset_factory
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
+from django.contrib.messages.views import SuccessMessageMixin
 
 
 from .forms import CrispyFormSetHelper
@@ -91,30 +94,67 @@ class ExtraContextMixin(object):
         context.update(self.extra_context)
         return context
 
+class SaveHookMixin(object):
+
+
+    def pre_save(self, object):
+        """
+        Hook for altering object before save.
+        """
+        pass
+
+
+    def post_save(self, object):
+        """
+        Hook for altering object after save.
+        """
+        pass
+
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.pre_save(self.object)
+        self.object.save()
+        form.save_m2m()
+        self.post_save(self.object)
+
+        return HttpResponseRedirect(self.get_success_url())
+
 
 class UserViewMixin(object):
     """
+    IMPORTANT: REQUIRES SaveHookMixin!
+
     This mixin alters a generic CREATE view that has a "created_by" field by
     automatically setting the user field to the current user when the form is submitted.
     The field name of the field to populate is specified by the user_field
     property and defaults to created_by.
     """
 
-    user_field = 'created_by'
+    user_field = ['created_by']
 
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(UserViewMixin, self).dispatch(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        # Ensure that user_field is a list.
+        if type(self.user_field) == str:
+            self.user_field = [self.user_field]
+        super(UserViewMixin, self).__init__(*args, **kwargs)
 
 
-    def form_valid(self, form):
-        obj = form.save(commit=False)
-        setattr(obj, self.user_field, self.request.user)
-        obj.save()
-        self.object = obj
+    def get_initial(self):
+        """
+        Supply user object as initial data for the specified user_field(s).
+        """
+        data = super(UserViewMixin, self).get_initial()
+        for k in self.user_field:
+            data[k] = self.request.user
 
-        return HttpResponseRedirect(self.get_success_url())
+        return data
+
+
+    def pre_save(self, instance):
+        for field in self.user_field:
+            setattr(instance, field, self.request.user)
 
 
 class DetailView(detail.DetailView):
@@ -125,30 +165,34 @@ class DetailView(detail.DetailView):
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)
 
-        fields = self.fields or self.model._meta.get_all_field_names()
-        field_data = {name:getattr(self.object, name) for name in fields}
+        #fields = self.fields or self.model._meta.get_all_field_names()
+        #field_data = {name:getattr(self.object, name) for name in fields}
 
-        context['fields'] = field_data
+        #context['fields'] = field_data
 
         return context
 
 
-class CreateView(ExtraContextMixin, edit.CreateView):
+class CreateView(SuccessMessageMixin, ExtraContextMixin, SaveHookMixin, edit.CreateView):
     """CreateView that offers extra_context and a default template."""
     template_name = 'generics/create.html'
 
 
-class UpdateView(ExtraContextMixin, edit.UpdateView):
+class UpdateView(SuccessMessageMixin, ExtraContextMixin, SaveHookMixin, edit.UpdateView):
     """UpdateView that offers extra_context and a default template."""
     template_name = 'generics/update.html'
 
 
-class DeleteView(ExtraContextMixin, edit.DeleteView):
+class DeleteView(SuccessMessageMixin, ExtraContextMixin, edit.DeleteView):
     """DeleteView that offers extra_context and a default template."""
     template_name = 'generics/delete.html'
 
 
 class FormSetMixin(object):
+
+    # The form class used for the inline items.
+    inline_form_class = forms.ModelForm
+
     fields = None
     excluded_fields = ['created_at', 'created_by']
 
@@ -161,6 +205,10 @@ class FormSetMixin(object):
 
     # Extra arguments for the formset factory for a field.
     factory_extra_args = {}
+
+    # Whether the fieldset and the individual items should be  expanded.
+    fieldsets_expanded = True
+    fieldset_items_expanded = True
 
 
     def __init__(self, *args, **kwargs):
@@ -181,25 +229,29 @@ class FormSetMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super(FormSetMixin, self).get_context_data(**kwargs)
-        context['fieldsets'] = self.get_fieldsets()
+        context['fieldsets'] = self.get_fieldsets().items()
         context['helper'] = self.get_fieldset_crispy_helper()
+        context['fieldsets_expanded'] = self.fieldsets_expanded
+        context['fieldset_items_expanded'] = self.fieldset_items_expanded
 
         return context
 
 
-    def form_valid(self, form):
-        # All is valid, so save the main form, and then
-        # also persist and add all the m2m objects.
-        instance = self.object = form.save(commit=False)
+    def pre_save(self, instance):
+        """
+        Hook for editing the instance.
+        """
 
+        pass
+
+
+    def post_save(self, instance):
         for name, formset in self.formsets.items():
             instances = formset.save()
             for model in instances:
                 getattr(instance, name).add(model)
 
         instance.save()
-
-        return HttpResponseRedirect(self.get_success_url())
 
 
     def post(self, request, *args, **kwargs):
@@ -217,8 +269,11 @@ class FormSetMixin(object):
             return self.form_invalid(form)
 
 
-class FormSetCreateView(FormSetMixin, ExtraContextMixin, edit.CreateView):
+class FormSetCreateView(SuccessMessageMixin, ExtraContextMixin, FormSetMixin, SaveHookMixin, edit.CreateView):
     template_name = 'generics/create_fieldsets.html'
+    extra = 3
+    can_delete = False
+
 
     def get_fieldsets(self):
         fieldsets = {}
@@ -228,7 +283,7 @@ class FormSetCreateView(FormSetMixin, ExtraContextMixin, edit.CreateView):
             target_model = field.related.parent_model
 
             # For m2m without a through model, use modelformset_factory.
-            # For m2m with a thorough model, inlineformset_factory is
+            # For m2m with a thorough model, inlineformset_factory
             # saves a bunch of work.
             # 
             # Determine which one to use by this HACKY method:
@@ -243,10 +298,10 @@ class FormSetCreateView(FormSetMixin, ExtraContextMixin, edit.CreateView):
             factory_kwargs = self.factory_extra_args[field.name] if field.name in self.factory_extra_args else {}
 
             if has_through_model:
-                fieldset_cls = inlineformset_factory(self.model, 
-                    field.rel.through, extra=self.extra, **factory_kwargs)
+                fieldset_cls = inlineformset_factory(self.model, field.rel.through,
+                    form=self.inline_form_class, extra=self.extra, **factory_kwargs)
             else:
-                fieldset_cls = modelformset_factory(target_model, 
+                fieldset_cls = modelformset_factory(target_model,  form=self.inline_form_class,
                     extra=self.extra, can_delete = self.can_delete, **factory_kwargs)
 
                 kwargs['prefix'] = field.name
@@ -262,7 +317,7 @@ class FormSetCreateView(FormSetMixin, ExtraContextMixin, edit.CreateView):
         return super(FormSetCreateView, self).post(request, *args, **kwargs)
 
 
-class FormSetUpdateView(FormSetMixin, ExtraContextMixin, edit.UpdateView):
+class FormSetUpdateView(SuccessMessageMixin, ExtraContextMixin, FormSetMixin, SaveHookMixin, edit.UpdateView):
     template_name = 'generics/update_fieldsets.html'
 
     def get_fieldsets(self):
@@ -290,12 +345,12 @@ class FormSetUpdateView(FormSetMixin, ExtraContextMixin, edit.UpdateView):
             factory_kwargs = self.factory_extra_args[field.name] if field.name in self.factory_extra_args else {}
 
             if has_through_model:
-                fieldset_cls = inlineformset_factory(self.model, 
-                    field.rel.through, extra=self.extra, **factory_kwargs)
+                fieldset_cls = inlineformset_factory(self.model, field.rel.through,
+                    form=self.inline_form_class, extra=self.extra, **factory_kwargs)
 
                 kwargs['instance'] = obj
             else:
-                fieldset_cls = modelformset_factory(target_model, 
+                fieldset_cls = modelformset_factory(target_model,  form=self.inline_form_class,
                     extra=self.extra, can_delete = self.can_delete, **factory_kwargs)
 
                 kwargs['prefix'] = field.name
@@ -314,4 +369,13 @@ class FormSetUpdateView(FormSetMixin, ExtraContextMixin, edit.UpdateView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         return super(FormSetUpdateView, self).post(request, *args, **kwargs)
+
+
+class ListView(ExtraContextMixin, generic.ListView):
+    template_name = "generics/list.html"
+
+
+
+
+
 
