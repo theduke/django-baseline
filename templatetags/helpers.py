@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from decimal import Decimal
 import urllib
 
@@ -192,3 +194,13 @@ def model_verbose(obj, capitalize=True):
 
     return name.capitalize() if capitalize else name
 model_verbose.is_safe = False
+
+
+@register.filter
+def user_can_edit(obj, user):
+    """
+    If a model implements the user_can_edit method,
+    this filter returns the result of the method.
+    """
+
+    return obj.user_can_edit(user) if hasattr(obj, "user_can_edit") else None

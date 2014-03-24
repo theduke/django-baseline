@@ -7,7 +7,7 @@ def render_template(tpl, context):
 	the output.
 	'''
 
-	templates = [tpl] if type(tpl) == str else tpl
+	templates = [tpl] if type(tpl) != list else tpl
 	tpl_instance = None
 
 	for tpl in templates:

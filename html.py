@@ -1,4 +1,5 @@
 # Various html helpers.
+from __future__ import unicode_literals
 
 
 def attributes(attr):

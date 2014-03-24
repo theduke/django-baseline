@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 
 def group_required(group,
                    login_url=None,
-                   redirect_field_name=REDIRECT_FIELD_NAME):
+                   redirect_field_name=REDIRECT_FIELD_NAME,
+                   skip_superuser=True):
     """
 	View decorator for requiring a user group.
 	"""
@@ -12,8 +13,10 @@ def group_required(group,
         @login_required(redirect_field_name=redirect_field_name,
                         login_url=login_url)
         def _wrapped_view(request, *args, **kwargs):
-            if request.user.groups.filter(name=group).count() == 0:
-            	raise PermissionDenied
+
+            if not (request.user.is_superuser and skip_superuser):
+                if request.user.groups.filter(name=group).count() == 0:
+                	raise PermissionDenied
 
             return view_func(request, *args, **kwargs)
         return _wrapped_view
