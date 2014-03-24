@@ -1,0 +1,5 @@
+django-utils Changelog
+=========
+
+0.1 (24.03.2014):
+    - Started development

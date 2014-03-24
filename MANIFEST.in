@@ -1,0 +1,3 @@
+include README.md LICENSE.txt CHANGELOG.txt
+recursive-include utils/static *
+recursive-include utils/templates *
