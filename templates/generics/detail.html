@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block page_title %}{{ object }}{% endblock %}
+{% block content %}
+<div class="object-detail">
+	{% for key, val in fields.items %}
+	<div class="field">
+		<span class="label">{{ key }}</span>
+		{{ val }}
+	</div>
+	{% endfor %}
+</div>
+{% endblock %}

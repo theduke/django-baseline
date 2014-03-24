@@ -4,6 +4,12 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
 
+class CrispyFormSetHelper(FormHelper):
+    def __init__(self, *args, **kwargs):
+        super(CrispyFormSetHelper, self).__init__(*args, **kwargs)
+        self.form_tag = False
+
+
 class CrispyForm(ModelForm):
 
     SUBMIT_LABEL = 'Submit'

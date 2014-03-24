@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load helpers %}
+{% load crispy_forms_tags %}
+
+{% block page_title %}Update {{ form|model_verbose }}: {{ object }}{% endblock %}
+
+{% block content %}
+{% include "generics/_formsets.html" %}
+{% endblock %}
