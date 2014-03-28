@@ -1,7 +1,7 @@
 django-baseline
 ================
 
-Version: 0.1.1 (28.03.2014)
+Version: 0.2.0 (28.03.2014)
 
 https://github.com/theduke/django-baseline
 
