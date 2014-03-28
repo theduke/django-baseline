@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils import dateformat, dateparse
 
-from utils import html
+from django_baseline import html
 
 register = template.Library()
 

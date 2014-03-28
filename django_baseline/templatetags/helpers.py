@@ -10,7 +10,7 @@ from django.forms import ModelForm
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-from utils import html
+from django_baseline import html
 
 register = template.Library()
 

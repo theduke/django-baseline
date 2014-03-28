@@ -1,7 +1,19 @@
 
 (function($) {
 
-	window.utils = {};
+	/*
+	 * For really old browsers, add a stub log function to prevent exceptions
+	 * when logging.
+	 */
+	if (!('console' in window)) {
+		window.console = {
+			log: function() {
+
+			}
+		}
+	}
+
+	window.baseline = {};
 
 	/**
 	 * Pretty print an amount of seconds as x years, x months,
@@ -12,7 +24,7 @@
 	 *
 	 * Set html to true for html rendered output.
 	 */
-	window.utils.prettyPrintTime = function(seconds, granularity, html) {
+	window.baseline.prettyPrintTime = function(seconds, granularity, html) {
 		if (!granularity) {
 			granularity = 'sec';
 		}

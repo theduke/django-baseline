@@ -10,7 +10,7 @@ window.utils.countdownbox = {
 
             var interval = setInterval(function() {
                 var timeLeft = Math.floor((new Date(endTime * 1000) - new Date()) / 1000);
-                counter.html(utils.prettyPrintTime(timeLeft, granularity, true));
+                counter.html(baseline.prettyPrintTime(timeLeft, granularity, true));
 
                 if (timeLeft <= 0) {
                     clearInterval(interval);

@@ -7,7 +7,7 @@ README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
-    name = 'django-utils',
+    name = 'django-baseline',
     version = '0.1.1',
     packages = find_packages(),
     include_package_data = True,
@@ -21,7 +21,7 @@ setup(
     license = 'BSD License',
     description = 'Convenienve functionality for Django projects.',
     long_description = README,
-    url = 'https://github.com/theduke/django-utils',
+    url = 'https://github.com/theduke/django-baseline',
     author = 'Christoph Herzog',
     author_email = 'chris@theduke.at',
     classifiers =[

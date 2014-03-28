@@ -1,11 +1,21 @@
-DJANGO-UTILS
+django-baseline
 ================
 
 Version: 0.1.1 (28.03.2014)
 
-This project contains a django app named "utils" that provides convenience functionality for Django.
+https://github.com/theduke/django-baseline
+
+This project contains a django app named "django_baseline" that provides convenience functionality for Django.
 
 License
 -------
 
-Django-utils is under the BSD license. See LICENSE.txt for details.
+django-baseline is under the BSD license. See LICENSE.txt for details.
+
+
+Contributors
+------------
+
+Christoph Herzog - chris@theduke.at
+
+If you want to contribute, do not hesitate to open a pull request on Github.
