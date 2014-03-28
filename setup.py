@@ -13,6 +13,8 @@ setup(
     include_package_data = True,
     install_requires = [
         'Django >= 1.6',
+        # Form helper.
+        'django-crispy-forms >= 1.4',
         # Needed for address field.
         'django-countries >= 2.0',
     ],
