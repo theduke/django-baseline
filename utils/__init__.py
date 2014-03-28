@@ -1,5 +1,6 @@
 __version__ = 0.1.0
 
+
 from django.utils.functional import lazy
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Group
