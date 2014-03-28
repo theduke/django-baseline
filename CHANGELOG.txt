@@ -3,3 +3,8 @@ django-utils Changelog
 
 0.1.0 (24.03.2014):
     - Started development
+0.1.1 (28.03.2014):
+	- Cleanup and some refactoring.
+	- new TimestampedModelMixin and get_object_or_none helper (models.py)
+	- new Address model with AddressForm (address.py)
+	- get_config convenience function for retrieving setting.py settings (__init__.py)

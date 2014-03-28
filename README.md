@@ -1,7 +1,7 @@
 DJANGO-UTILS
 ================
 
-Version: 0.1.0 (24.03.2014)
+Version: 0.1.1 (28.03.2014)
 
 This project contains a django app named "utils" that provides convenience functionality for Django.
 
