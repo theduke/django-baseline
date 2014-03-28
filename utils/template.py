@@ -1,4 +1,3 @@
-
 from django import template
 
 def render_template(tpl, context):

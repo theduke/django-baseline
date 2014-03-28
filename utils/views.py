@@ -14,6 +14,9 @@ from django.contrib.messages.views import SuccessMessageMixin
 
 from .forms import CrispyFormSetHelper
 
+#######################
+# Generic view MIXINS #
+#######################
 
 class AjaxableResponseMixin(object):
     """
@@ -82,7 +85,7 @@ class CrispyFormAjaxResponseMixin(object):
 class ExtraContextMixin(object):
     """
     A mixin for Djangos generic views classes that offers an additional
-    member extra_context for easily passing additional context vars.
+    property extra_context for easily passing additional context vars.
     """
 
     extra_context = {}
@@ -90,17 +93,23 @@ class ExtraContextMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super(ExtraContextMixin, self).get_context_data(**kwargs)
+        # Add model verbose name to the context if needed in template.
         context['model_name'] = self.model._meta.verbose_name.capitalize()
         context.update(self.extra_context)
         return context
 
-class SaveHookMixin(object):
 
+class SaveHookMixin(object):
+    """
+    A generic edit view mixin that provides pre_save and 
+    post_save hooks.
+    """
 
     def pre_save(self, object):
         """
         Hook for altering object before save.
         """
+
         pass
 
 
@@ -108,6 +117,7 @@ class SaveHookMixin(object):
         """
         Hook for altering object after save.
         """
+
         pass
 
 
@@ -135,16 +145,17 @@ class UserViewMixin(object):
 
 
     def __init__(self, *args, **kwargs):
+        super(UserViewMixin, self).__init__(*args, **kwargs)
         # Ensure that user_field is a list.
         if type(self.user_field) == str:
             self.user_field = [self.user_field]
-        super(UserViewMixin, self).__init__(*args, **kwargs)
 
 
     def get_initial(self):
         """
         Supply user object as initial data for the specified user_field(s).
         """
+
         data = super(UserViewMixin, self).get_initial()
         for k in self.user_field:
             data[k] = self.request.user
@@ -153,11 +164,26 @@ class UserViewMixin(object):
 
 
     def pre_save(self, instance):
+        """
+        Use SaveHookMixin pre_save to set the user.
+        """
+
         for field in self.user_field:
             setattr(instance, field, self.request.user)
 
+#############################
+# Generic view base classes #
+#############################
+
+
+class ListView(ExtraContextMixin, generic.ListView):
+    template_name = "generics/list.html"
+
 
 class DetailView(detail.DetailView):
+    """
+    DetailView which tries to show all the fields of a model.
+    """
 
     template_name = "generics/detail.html"
     fields = None
@@ -174,21 +200,35 @@ class DetailView(detail.DetailView):
 
 
 class CreateView(SuccessMessageMixin, ExtraContextMixin, SaveHookMixin, edit.CreateView):
-    """CreateView that offers extra_context and a default template."""
+    """
+    CreateView that offers extra_context and a default template.
+    """
+
     template_name = 'generics/create.html'
 
 
 class UpdateView(SuccessMessageMixin, ExtraContextMixin, SaveHookMixin, edit.UpdateView):
-    """UpdateView that offers extra_context and a default template."""
+    """
+    UpdateView that offers extra_context and a default template.
+    """
+
     template_name = 'generics/update.html'
 
 
 class DeleteView(SuccessMessageMixin, ExtraContextMixin, edit.DeleteView):
-    """DeleteView that offers extra_context and a default template."""
+    """
+    DeleteView that offers extra_context and a default template.
+    """
+
     template_name = 'generics/delete.html'
 
 
 class FormSetMixin(object):
+    """
+    A ModelForm mixin that makes creating views with inline 
+    formsets really easy.
+    Used by FormSetCreateView and FormSetUpdateView.
+    """
 
     # The form class used for the inline items.
     inline_form_class = forms.ModelForm
@@ -270,6 +310,10 @@ class FormSetMixin(object):
 
 
 class FormSetCreateView(SuccessMessageMixin, ExtraContextMixin, FormSetMixin, SaveHookMixin, edit.CreateView):
+    """
+    CreateView for a model with inline forms of another model.
+    """
+
     template_name = 'generics/create_fieldsets.html'
     extra = 3
     can_delete = False
@@ -318,6 +362,10 @@ class FormSetCreateView(SuccessMessageMixin, ExtraContextMixin, FormSetMixin, Sa
 
 
 class FormSetUpdateView(SuccessMessageMixin, ExtraContextMixin, FormSetMixin, SaveHookMixin, edit.UpdateView):
+    """
+    UpdateView for a model with inline forms of another model.
+    """
+
     template_name = 'generics/update_fieldsets.html'
 
     def get_fieldsets(self):
@@ -369,13 +417,3 @@ class FormSetUpdateView(SuccessMessageMixin, ExtraContextMixin, FormSetMixin, Sa
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         return super(FormSetUpdateView, self).post(request, *args, **kwargs)
-
-
-class ListView(ExtraContextMixin, generic.ListView):
-    template_name = "generics/list.html"
-
-
-
-
-
-
