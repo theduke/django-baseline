@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from django import template
 
 def render_template(tpl, context):
