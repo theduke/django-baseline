@@ -10,3 +10,7 @@ django-baseline CHANGELOG
 	- get_config convenience function for retrieving setting.py settings (__init__.py)
 0.2.0 (28.03.2014):
 	- Refactored to name django_baseline
+0.2.1 (28.03.2014):
+  - Fixed syntax error due to version number not a string.
+  - Fixes missing forms.ModelForm due to refactoring.
+

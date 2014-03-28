@@ -51,7 +51,7 @@ class CrispyFormSetHelper(FormHelper):
         self.form_tag = False
 
 
-class CrispyInlineParentForm(ModelForm):
+class CrispyInlineParentForm(forms.ModelForm):
     """
     Convenience ModelForm base class which uses a Crispy FormHelper
     with disabled form tag. Used for inline formsets in views.py.
