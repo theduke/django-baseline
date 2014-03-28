@@ -1,5 +1,19 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import ugettext_lazy as _
+
+
+def get_object_or_none(qs, *args, **kwargs):
+    """
+    Try to retrieve a model, and return None if 
+    it is not found. 
+    Useful if you do not want to bother with the try/except block.
+    """
+
+    try:
+        return qs.get(*args, **kwargs)
+    except models.ObjectDoesNotExist:
+        return None
 
 
 class ContentTypeInheritanceBase(models.Model):
@@ -33,3 +47,12 @@ class ContentTypeInheritanceBase(models.Model):
 
     class Meta:
         abstract = True
+
+
+class TimeStampedModelMixin(object):
+    """
+    A model mixin for created_at and modified_at fields.
+    """
+
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
+    modified_at = models.DateTimeField(_("Modified at"), auto_now=True)
