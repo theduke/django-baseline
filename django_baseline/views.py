@@ -12,6 +12,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.exceptions import PermissionDenied
 
 
 from .forms import CrispyFormSetHelper
@@ -103,8 +104,8 @@ class ExtraContextMixin(object):
 
 class SaveHookMixin(object):
     """
-    A generic edit view mixin that provides pre_save and 
-    post_save hooks.
+    A generic edit view mixin that provides pre_save 
+    post_save, pre_delete and post_delete hooks.
     """
 
     def pre_save(self, object):
@@ -123,7 +124,24 @@ class SaveHookMixin(object):
         pass
 
 
+    def pre_delete(self, object):
+        """
+        Hook for check or alterations before deleting.
+        """
+
+        pass
+
+
+    def post_delete(self, object):
+        """
+        Hook for alterations after delete.
+        """
+
+
     def form_valid(self, form):
+        """
+        Calls pre and post save hooks.
+        """
         self.object = form.save(commit=False)
         self.pre_save(self.object)
         self.object.save()
@@ -131,6 +149,60 @@ class SaveHookMixin(object):
         self.post_save(self.object)
 
         return HttpResponseRedirect(self.get_success_url())
+
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Calls pre and post delete hooks for DelteView s.
+        """
+
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.pre_delete(self.object)
+        self.object.delete()
+        self.post_delete(self.object)
+        
+        return HttpResponseRedirect(success_url)
+
+
+class AssertUserIsOwnerMixin(object):
+    """
+    This mixin for edit views asserts that the user updating or deleting the 
+    model is also the owner of the model.
+    The owner is determined by a ForeignKey field on the model.
+    The name of the filed is specified by owner_field and defaults to user.
+
+    By default, the check is skipped for superusers.
+    If you do not want to do this, set assert_user_is_owner_skip_superuser = False.
+
+    TODO: rewrite to prevent duplicate calls to get_object().
+    """
+
+    owner_field = "user"
+    assert_user_is_owner_skip_superuser = True
+
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.assert_user_is_owner(self.object, request.user)
+
+        return super(AssertUserIsOwnerMixin, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.assert_user_is_owner(self.object, request.user)
+
+        return super(AssertUserIsOwnerMixin, self).post(request, *args, **kwargs)
+
+
+    def assert_user_is_owner(self, instance, user):
+        if user.is_superuser and self.assert_user_is_owner_skip_superuser:
+            return
+
+        instance_user = getattr(instance, self.owner_field)
+        if instance_user != user:
+            raise PermissionDenied()
+
 
 
 class UserViewMixin(object):
@@ -149,7 +221,7 @@ class UserViewMixin(object):
     def __init__(self, *args, **kwargs):
         super(UserViewMixin, self).__init__(*args, **kwargs)
         # Ensure that user_field is a list.
-        if type(self.user_field) == str:
+        if type(self.user_field) != list:
             self.user_field = [self.user_field]
 
 
@@ -169,7 +241,6 @@ class UserViewMixin(object):
         """
         Use SaveHookMixin pre_save to set the user.
         """
-
         for field in self.user_field:
             setattr(instance, field, self.request.user)
 
