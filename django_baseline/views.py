@@ -143,7 +143,13 @@ class SaveHookMixin(object):
         Calls pre and post save hooks.
         """
         self.object = form.save(commit=False)
-        self.pre_save(self.object)
+        
+        # Invoke pre_save hook, and allow it to abort the saving
+        # process and do a redirect.        
+        response = self.pre_save(self.object)
+        if response:
+            return response
+
         self.object.save()
         form.save_m2m()
         self.post_save(self.object)
@@ -153,7 +159,7 @@ class SaveHookMixin(object):
 
     def delete(self, request, *args, **kwargs):
         """
-        Calls pre and post delete hooks for DelteView s.
+        Calls pre and post delete hooks for DelteViews.
         """
 
         self.object = self.get_object()
@@ -238,11 +244,15 @@ class UserViewMixin(object):
 
 
     def pre_save(self, instance):
+        super(UserViewMixin, self).pre_save(instance)
+
         """
         Use SaveHookMixin pre_save to set the user.
         """
-        for field in self.user_field:
-            setattr(instance, field, self.request.user)
+        if  self.request.user.is_authenticated():
+            for field in self.user_field:
+                setattr(instance, field, self.request.user)
+
 
 #############################
 # Generic view base classes #
