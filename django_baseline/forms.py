@@ -19,12 +19,12 @@ class CrispyFormMixin(object):
         self.helper = FormHelper()
 
         self.helper.add_input(Submit('submit', self.SUBMIT_LABEL))
-        self.helper.form_method =  self.HTTP_METHOD
+        self.helper.form_method = self.HTTP_METHOD
 
 
 class CrispyForm(CrispyFormMixin, forms.Form):
     """
-    Convenience base class for regular forms which 
+    Convenience base class for regular forms which
     will be rendered with crispy.
     """
 
@@ -33,7 +33,7 @@ class CrispyForm(CrispyFormMixin, forms.Form):
 
 class CrispyModelForm(CrispyFormMixin, forms.ModelForm):
     """
-    Convenience base class for ModelForms which 
+    Convenience base class for ModelForms which
     will be rendered with crispy.
     """
 
@@ -58,7 +58,7 @@ class CrispyInlineParentForm(forms.ModelForm):
     """
 
     def __init__(self, *args, **kwargs):
-        super(InlineParentForm, self).__init__(*args, **kwargs)
+        super(CrispyInlineParentForm, self).__init__(*args, **kwargs)
         # Set to false because form set is used.
         # See http://django-crispy-forms.readthedocs.org/en/d-0/tags.html#rendering-several-forms-with-helpers.
         self.helper = CrispyFormSetHelper()

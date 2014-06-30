@@ -8,7 +8,8 @@ def attributes(attr):
 
 
 def tag(name, content='', attr={}, filter_empty_attr=True):
-	if filter_empty_attr: attr = {k:v for k,v in attr.items() if v}
-	attr = ' ' + attributes(attr) if len(attr) else ''
+    if filter_empty_attr:
+        attr = {k:v for k, v in attr.items() if v}
+    attr = ' ' + attributes(attr) if len(attr) else ''
 
-	return '<{n}{a}>{c}</{n}>'.format(n=name, c=content, a=attr)
+    return '<{n}{a}>{c}</{n}>'.format(n=name, c=content, a=attr)

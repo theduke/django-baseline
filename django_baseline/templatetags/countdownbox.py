@@ -1,12 +1,9 @@
 from __future__ import unicode_literals
 
-from decimal import Decimal
 import datetime
 
 from django import template
 
-from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.utils import dateformat, dateparse
 
 from django_baseline import html
@@ -14,7 +11,8 @@ from django_baseline import html
 register = template.Library()
 
 @register.simple_tag
-def countdown(name, date, description='', id='', granularity='sec', start=None, progressbar=False, progressbar_inversed=False, showpct=False):
+def countdown(name, date, description='', id='', granularity='sec', start=None,
+  progressbar=False, progressbar_inversed=False, showpct=False):
     '''
     Create a countdown.
     '''
@@ -27,13 +25,17 @@ def countdown(name, date, description='', id='', granularity='sec', start=None, 
 
     if progressbar:
         if not end: raise Exception('For progressbar, start date is requried.')
-        start_date = dateparse.parse_datetime(start) or datetime.datetime.combine(dateparse.parse_date(start), datetime.time())
+        parsed_date = datetime.datetime.combine(
+            dateparse.parse_date(start), datetime.time())
+        start_date = dateparse.parse_datetime(start) or parsed_date
         now = datetime.datetime.now()
 
-        pct = (now - start_date).total_seconds() / (end_date - start_date).total_seconds()
+        pct = (now - start_date).total_seconds() /\
+            (end_date - start_date).total_seconds()
         pct = int(pct * 100)
 
-        if progressbar_inversed: pct = 100 - pct
+        if progressbar_inversed:
+            pct = 100 - pct
 
         # Note: the output is for bootstrap!
         bar = '<div class="progress progress-striped active">'
@@ -56,6 +58,7 @@ def countdown(name, date, description='', id='', granularity='sec', start=None, 
     	'data-datetime': end,
     	'data-granularity': granularity
     }
-    if id: attr['id'] = id 
+    if id:
+        attr['id'] = id
 
     return html.tag('div', content, attr)

@@ -104,7 +104,7 @@ class ExtraContextMixin(object):
 
 class SaveHookMixin(object):
     """
-    A generic edit view mixin that provides pre_save 
+    A generic edit view mixin that provides pre_save
     post_save, pre_delete and post_delete hooks.
     """
 
@@ -143,9 +143,9 @@ class SaveHookMixin(object):
         Calls pre and post save hooks.
         """
         self.object = form.save(commit=False)
-        
+
         # Invoke pre_save hook, and allow it to abort the saving
-        # process and do a redirect.        
+        # process and do a redirect.
         response = self.pre_save(self.object)
         if response:
             return response
@@ -167,19 +167,20 @@ class SaveHookMixin(object):
         self.pre_delete(self.object)
         self.object.delete()
         self.post_delete(self.object)
-        
+
         return HttpResponseRedirect(success_url)
 
 
 class AssertUserIsOwnerMixin(object):
     """
-    This mixin for edit views asserts that the user updating or deleting the 
+    This mixin for edit views asserts that the user updating or deleting the
     model is also the owner of the model.
     The owner is determined by a ForeignKey field on the model.
     The name of the filed is specified by owner_field and defaults to user.
 
     By default, the check is skipped for superusers.
-    If you do not want to do this, set assert_user_is_owner_skip_superuser = False.
+    If you do not want to do this,
+    set assert_user_is_owner_skip_superuser = False.
 
     TODO: rewrite to prevent duplicate calls to get_object().
     """
@@ -198,7 +199,8 @@ class AssertUserIsOwnerMixin(object):
         self.object = self.get_object()
         self.assert_user_is_owner(self.object, request.user)
 
-        return super(AssertUserIsOwnerMixin, self).post(request, *args, **kwargs)
+        return super(AssertUserIsOwnerMixin, self).post(
+            request, *args, **kwargs)
 
 
     def assert_user_is_owner(self, instance, user):
@@ -216,7 +218,8 @@ class UserViewMixin(object):
     IMPORTANT: REQUIRES SaveHookMixin!
 
     This mixin alters a generic CREATE view that has a "created_by" field by
-    automatically setting the user field to the current user when the form is submitted.
+    automatically setting the user field to the current user when the form is
+    submitted.
     The field name of the field to populate is specified by the user_field
     property and defaults to created_by.
     """
@@ -308,7 +311,7 @@ class DeleteView(SuccessMessageMixin, ExtraContextMixin, edit.DeleteView):
 
 class FormSetMixin(object):
     """
-    A ModelForm mixin that makes creating views with inline 
+    A ModelForm mixin that makes creating views with inline
     formsets really easy.
     Used by FormSetCreateView and FormSetUpdateView.
     """
@@ -319,7 +322,7 @@ class FormSetMixin(object):
     fields = None
     excluded_fields = ['created_at', 'created_by']
 
-    # m2m fields that should be displayed with the default widget, 
+    # m2m fields that should be displayed with the default widget,
     # instead of inline.
     forced_regular_fields = []
 
@@ -340,10 +343,12 @@ class FormSetMixin(object):
         # Auto-set fields to exclude the fieldsets.
         if self.fields == None:
             # All regular fields, except explicitly excluded ones.
-            self.fields = [field.name for field in self.model._meta.fields if not field.name in self.excluded_fields]
+            self.fields = [field.name for field in self.model._meta.fields
+                if not field.name in self.excluded_fields]
             # Also add m2m fields that are explcitly set to normal widget
             # with self.forced_regular_fields.
-            self.fields += [field.name for field in self.model._meta.many_to_many if field.name in self.forced_regular_fields]            
+            self.fields += [field.name for field in self.model._meta.many_to_many
+                if field.name in self.forced_regular_fields]
 
 
     def get_fieldset_crispy_helper(self):
@@ -412,9 +417,9 @@ class FormSetCreateView(SuccessMessageMixin, ExtraContextMixin, FormSetMixin, Sa
             # For m2m without a through model, use modelformset_factory.
             # For m2m with a thorough model, inlineformset_factory
             # saves a bunch of work.
-            # 
+            #
             # Determine which one to use by this HACKY method:
-            # Check for underscores in through model name, 
+            # Check for underscores in through model name,
             # since the auto-generated m2m tables have an underscore.
 
             has_through_model = field.rel.through._meta.object_name.find('_') == -1
@@ -428,7 +433,7 @@ class FormSetCreateView(SuccessMessageMixin, ExtraContextMixin, FormSetMixin, Sa
                 fieldset_cls = inlineformset_factory(self.model, field.rel.through,
                     form=self.inline_form_class, extra=self.extra, **factory_kwargs)
             else:
-                fieldset_cls = modelformset_factory(target_model,  form=self.inline_form_class,
+                fieldset_cls = modelformset_factory(target_model, form=self.inline_form_class,
                     extra=self.extra, can_delete = self.can_delete, **factory_kwargs)
 
                 kwargs['prefix'] = field.name

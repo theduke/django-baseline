@@ -7,8 +7,8 @@ from django.utils.translation import ugettext_lazy as _
 
 def get_object_or_none(qs, *args, **kwargs):
     """
-    Try to retrieve a model, and return None if 
-    it is not found. 
+    Try to retrieve a model, and return None if
+    it is not found.
     Useful if you do not want to bother with the try/except block.
     """
 
@@ -34,15 +34,16 @@ class ContentTypeInheritanceBase(models.Model):
         '''
         return ContentType.objects.get_for_model(cls)
 
-    def save(self):
-        if (not self.content_type):
-            self.content_type = ContentType.objects.get_for_model(self.__class__)
+    def save(self, **kwargs):
+        if not self.content_type:
+            contenttype = ContentType.objects.get_for_model(self.__class__)
+            self.content_type = contenttype
         self.save_base()
 
     def get_child(self):
         content_type = self.content_type
         model = content_type.model_class()
-        if(model == ContentTypeInheritanceBase or model == self.__class__):
+        if model == ContentTypeInheritanceBase or model == self.__class__:
             return self
 
         return model.objects.get(id=self.id)

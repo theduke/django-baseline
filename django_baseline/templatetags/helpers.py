@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 from decimal import Decimal
-import urllib
 
 from django import template
 from django.db.models import Model
@@ -51,7 +50,8 @@ def link(url, text='', classes='', target='', get="", **kwargs):
         if get:
             url += '?' + get
 
-    return html.tag('a', text or url, {'class': classes, 'target': target, 'href': url})
+    return html.tag('a', text or url, {
+        'class': classes, 'target': target, 'href': url})
 
 
 @register.simple_tag
@@ -64,7 +64,8 @@ def jsfile(url):
         #add media_url for relative paths
         url = settings.STATIC_URL + url
 
-    return '<script type="text/javascript" src="{src}"></script>'.format(src=url)
+    return '<script type="text/javascript" src="{src}"></script>'.format(
+        src=url)
 
 
 @register.simple_tag
@@ -187,7 +188,7 @@ def model_verbose(obj, capitalize=True):
 
     if isinstance(obj, ModelForm):
         name = obj._meta.model._meta.verbose_name
-    elif isinstance(obj,  Model):
+    elif isinstance(obj, Model):
         name = obj._meta.verbose_name
     else:
         raise Exception('Unhandled type: ' + type(obj))

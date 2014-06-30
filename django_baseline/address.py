@@ -16,7 +16,6 @@ class Address(models.Model):
 
 
 class AddressForm(CrispyModelForm):
- 
     class Meta:
         model = Address
         fields = ['country', 'state', 'town', 'postal_code', 'street']
